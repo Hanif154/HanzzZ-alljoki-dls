@@ -1,0 +1,488 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#01173d;
+    color:#fff;
+}
+
+/* ================= NAVBAR ================= */
+
+nav{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 8%;
+    background:#081120;
+
+    position:sticky;
+    top:0;
+    z-index:9999;
+}
+
+nav h2{
+    color:#fff;
+}
+
+nav a{
+    color:#fff;
+    text-decoration:none;
+    margin-left:20px;
+    transition:.3s;
+}
+
+nav a:hover{
+    color:#4dabff;
+}
+
+/* ================= BUTTON ================= */
+
+button,
+.btn{
+    display:inline-block;
+    padding:12px 25px;
+    background:#0d6efd;
+    color:#fff;
+    text-decoration:none;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover,
+.btn:hover{
+    transform:translateY(-3px);
+    background:#0b5ed7;
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:80px 8%;
+    gap:50px;
+}
+
+.hero h1{
+    font-size:52px;
+}
+
+.hero p{
+    margin:20px 0;
+    color:#b7c0cf;
+}
+
+.right img{
+    width:500px;
+    max-width:100%;
+}
+
+/* ================= STATS ================= */
+
+.stats{
+    display:flex;
+    gap:30px;
+    margin:30px 0;
+}
+
+.stats h2{
+    color:#4dabff;
+}
+
+/* ================= SECTION ================= */
+
+section{
+    padding:80px 8%;
+}
+
+.title{
+    text-align:center;
+    margin-bottom:40px;
+    font-size:35px;
+}
+
+/* ================= CARD BIASA ================= */
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:#111d33;
+    padding:25px;
+    border-radius:15px;
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-8px);
+}
+
+/* ================= FAQ ================= */
+
+.faq{
+    background:#111d33;
+    padding:20px;
+    margin-top:15px;
+    border-radius:12px;
+}
+
+/* ================= PRICING ================= */
+
+.pricing{
+    background:#0f172a;
+}
+
+.pricing h2{
+    text-align:center;
+    font-size:36px;
+    margin-bottom:50px;
+}
+
+.pricing-container{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    flex-wrap:wrap;
+}
+
+.price-card{
+    width:300px;
+    background:#1e293b;
+    padding:35px 25px;
+    border-radius:18px;
+    position:relative;
+    text-align:center;
+    transition:.3s;
+}
+
+.price-card:hover{
+    transform:translateY(-10px);
+}
+
+.price-card.active{
+    border:2px solid #00c3ff;
+}
+
+.best{
+    position:absolute;
+    top:15px;
+    right:15px;
+    background:#00c3ff;
+    color:#fff;
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+}
+
+.price-card h1{
+    color:#00c3ff;
+    margin:20px 0;
+}
+
+.price-card ul{
+    list-style:none;
+    margin:25px 0;
+}
+
+.price-card li{
+    margin:12px 0;
+}
+
+
+/* ================= PRICING ================= */
+
+.pricing{
+
+    padding:90px 8%;
+
+}
+
+.section-title{
+
+    text-align:center;
+    margin-bottom:45px;
+
+}
+
+.section-title h2{
+
+    font-size:42px;
+    color:#fff;
+
+}
+
+.section-title p{
+
+    color:#94A3B8;
+    margin-top:10px;
+
+}
+
+.pricing-container{
+
+    max-width:850px;
+    margin:auto;
+
+}
+
+.price-card{
+
+    background:#162033;
+
+    border-radius:18px;
+
+    margin-bottom:20px;
+
+    overflow:hidden;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    transition:.3s;
+
+}
+
+.price-card:hover{
+
+    border-color:#2563EB;
+
+    box-shadow:0 15px 35px rgba(37,99,235,.18);
+
+}
+
+.price-card summary{
+
+    list-style:none;
+
+    cursor:pointer;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:22px 28px;
+
+    font-size:20px;
+
+    font-weight:600;
+
+}
+
+.price-card summary::-webkit-details-marker{
+
+    display:none;
+
+}
+
+.price-content{
+
+    padding:0 28px 25px;
+
+}
+
+.price-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:15px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+
+    
+
+}
+
+.order-btn{
+
+    display:block;
+
+    text-align:center;
+
+    margin-top:25px;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    background:#2563EB;
+
+    color:white;
+
+    text-decoration:none;
+
+    transition:.3s;
+
+}
+
+.order-btn:hover{
+
+    background:#3B82F6;
+
+}
+
+
+
+/* ================= CONTACT ================= */
+
+.contact{
+    padding:80px 8%;
+    text-align:center;
+}
+
+.contact-title h2{
+    font-size:40px;
+    color:#fff;
+}
+
+.contact-title p{
+    color:#94A3B8;
+    margin:10px 0 45px;
+}
+
+.contact-grid{
+    display:flex;
+    justify-content:center;
+    gap:25px;
+    flex-wrap:wrap;
+}
+
+.contact-card{
+
+    position:relative;
+    overflow:hidden;
+
+    width:170px;
+    height:170px;
+
+    background:#162033;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:20px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-decoration:none;
+    color:#fff;
+
+    transition:.35s ease;
+
+}
+
+/* Efek cahaya */
+
+.contact-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:0;
+    left:-100%;
+
+    width:100%;
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.12),
+        transparent
+    );
+
+    transition:.5s;
+
+}
+
+.contact-card:hover::before{
+
+    left:100%;
+
+}
+
+.contact-card:hover{
+
+    transform:translateY(-10px);
+
+    border-color:#2563EB;
+
+    box-shadow:0 15px 35px rgba(37,99,235,.30);
+
+}
+
+.contact-card i{
+
+    font-size:48px;
+
+    margin-bottom:15px;
+
+    transition:.35s;
+
+}
+
+.contact-card:hover i{
+
+    transform:scale(1.2);
+
+}
+
+.contact-card span{
+
+    font-size:16px;
+    font-weight:600;
+
+}
+
+/* Warna icon */
+
+.whatsapp i{
+    color:#25D366;
+}
+
+.instagram i{
+    color:#E1306C;
+}
+
+.facebook i{
+    color:#1877F2;
+}
+
+.gmail i{
+    color:#EA4335;
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+    padding:15px;
+    text-align:center;
+    background:#050b14;
+    bottom: 0;
+    position: sticky;
+}
+
+footer p{
+    margin-top:10px;
+    color:#9ca3af;
+    bottom: 0;
+}
