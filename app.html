@@ -67,7 +67,7 @@ const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n).toLocaleString('id-ID'
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ST={MENUNGGU_BAYAR:'Menunggu bayar',MENUNGGU_VERIFIKASI:'Menunggu verifikasi',DIPROSES:'Diproses',SELESAI:'Selesai',DIBATALKAN:'Dibatalkan',PEMBAYARAN_DITOLAK:'Pembayaran ditolak'};
 const SV={coin:'Coin',diamond:'Diamond',event:'Event',livetier:'Live Tier',clans:'Clans Point',dreampoint:'Dream Point',seasonpass:'Season Pass',dreamdraft:'Dream Draft'};
-let me=null,tab='order',svc='coin',reg=false,flt='';
+let P={},me=null,tab='order',svc='coin',reg=false,flt='';
 
 function msg(t,ok){const m=$('#msg');m.textContent=t||'';m.className=ok?'ok':'err';m.style.display=t?'block':'none'}
 function mode(){reg=!reg;$('#ttl').textContent=reg?'Daftar':'Masuk';$('#go').textContent=reg?'Daftar':'Masuk';$('#wbox').hidden=!reg;$('#sw').textContent=reg?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';msg('')}
@@ -91,14 +91,15 @@ async function init(){
  const{data:{session}}=await sb.auth.getSession();
  if(!session){$('#auth').hidden=false;$('#app').hidden=true;return}
  const{data}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+ const{data:pr}=await sb.from('prices').select('service_id,key,price');P={};(pr||[]).forEach(r=>P[r.service_id+'.'+r.key]=r.price);
  me=data;$('#auth').hidden=true;$('#app').hidden=false;msg('');render();
 }
 
 function render(){
- const t=[['order','Pesan'],['mine','Order Saya']];if(me.is_admin)t.push(['admin','Admin']);
+ const t=[['order','Pesan'],['mine','Order Saya']];if(me.is_admin)t.push(['admin','Admin'],['harga','Harga']);
  $('#tabs').innerHTML=t.map(([k,n])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${n}</button>`).join('')+'<button onclick="out()">Keluar</button>';
  $('#who').textContent=me.username;msg('');
- ({order:form,mine:mine,admin:admin})[tab]();
+ ({order:form,mine:mine,admin:admin,harga:priceEditor})[tab]();
 }
 
 /* ---------- FORM ORDER ---------- */
@@ -107,10 +108,10 @@ coin:'<label>Bonus Stadion (1-52)</label><input id="f1" type="number" min="1" ma
 diamond:'<label>Jumlah diamond</label><input id="f1" type="number" min="1" value="100">',
 event:'<label>Rentang tier</label><select id="f1"><option value="20-16">Tier 20 → 16</option><option value="15-11">Tier 15 → 11</option><option value="10-6">Tier 10 → 6</option><option value="5-1">Tier 5 → 1</option><option value="special">Event pemain spesial (semua tier)</option></select>',
 livetier:'<label>Tier sekarang (1-20)</label><input id="f1" type="number" min="1" max="20" value="20"><label>Tier tujuan (1-20)</label><input id="f2" type="number" min="1" max="20" value="15">',
-clans:'<label>Paket</label><select id="f1"><option value="30k">30.000 CP — Rp2.000</option><option value="350k">350.000 CP — Rp20.000</option></select><label>Jumlah paket</label><input id="f2" type="number" min="1" max="50" value="1">',
-dreampoint:'<label>Jumlah (tiap 1 = 10K DP, Rp20.000)</label><input id="f1" type="number" min="1" max="100" value="1">',
-seasonpass:'<label>Jumlah XP (kelipatan 500, Rp1.000 / 500 XP)</label><input id="f1" type="number" min="500" step="500" value="500">',
-dreamdraft:'<p class="m">Dream Draft — Rp12.000, tanpa pilihan tambahan.</p>'};
+clans:'<label>Paket</label><select id="f1"><option value="30k">30.000 CP</option><option value="350k">350.000 CP</option></select><label>Jumlah paket</label><input id="f2" type="number" min="1" max="50" value="1">',
+dreampoint:'<label>Jumlah (tiap 1 = 10K DP)</label><input id="f1" type="number" min="1" max="100" value="1">',
+seasonpass:'<label>Jumlah XP (kelipatan 500)</label><input id="f1" type="number" min="500" step="500" value="500">',
+dreamdraft:'<p class="m">Dream Draft, tanpa pilihan tambahan.</p>'};
 
 function det(){
  if(svc=='coin')return{stadium:+$('#f1').value,amount_k:+$('#f2').value};
@@ -122,16 +123,16 @@ function det(){
  if(svc=='dreamdraft')return{};
  return{from_tier:+$('#f1').value,to_tier:+$('#f2').value};
 }
-function calc(s,d){ // hanya estimasi; harga resmi dihitung server
- let t=0;
- if(s=='coin')t=d.amount_k*(d.stadium<=25?4000:d.stadium<=39?3000:2000);
- else if(s=='diamond')t=d.amount*(d.amount>=1000?50:60);
- else if(s=='event')t={'20-16':8000,'15-11':12000,'10-6':15000,'5-1':18000,special:25000}[d.range];
- else if(s=='clans')t=({'30k':2000,'350k':20000}[d.package]||0)*d.qty;
- else if(s=='dreampoint')t=d.amount_10k*20000;
- else if(s=='seasonpass')t=Math.floor(d.xp/500)*1000;
- else if(s=='dreamdraft')t=12000;
- else{const f=d.from_tier,o=d.to_tier;if(o<f)for(let i=o;i<f;i++)t+=i<=3?8000:i<=8?6000:i<=13?4000:2000;else t=(o-f)*2000}
+function calc(s,d){ // estimasi dari harga database; harga resmi dihitung server
+ const g=k=>P[s+'.'+k]||0;let t=0;
+ if(s=='coin')t=d.amount_k*g(d.stadium<=25?'rate_1_25':d.stadium<=39?'rate_26_39':'rate_40_52');
+ else if(s=='diamond')t=d.amount*g(d.amount>=1000?'rate_bulk':'rate');
+ else if(s=='event')t=g(d.range);
+ else if(s=='clans')t=g(d.package)*d.qty;
+ else if(s=='dreampoint')t=d.amount_10k*g('per_10k');
+ else if(s=='seasonpass')t=Math.floor(d.xp/500)*g('per_500xp');
+ else if(s=='dreamdraft')t=g('flat');
+ else{const f=d.from_tier,o=d.to_tier;if(o<f)for(let i=o;i<f;i++)t+=g(i<=3?'rate_1_3':i<=8?'rate_4_8':i<=13?'rate_9_13':'rate_14_20');else t=(o-f)*g('rate_down')}
  return t||0;
 }
 function est(){try{$('#est').textContent=rp(calc(svc,det()))}catch(e){}}
@@ -187,6 +188,19 @@ async function act(id,a){
  else if(a=='verify'&&!confirm('Pastikan ID dan nominal sudah cocok di mutasi DANA. Verifikasi?'))return;
  const{error}=await sb.rpc('admin_update_order',{p_order_id:id,p_action:a,p_note:n});
  if(error)alert(error.message);admin();
+}
+
+async function priceEditor(){
+ const{data,error}=await sb.from('prices').select('*').order('service_id').order('sort');
+ if(error)return msg(error.message);
+ $('#v').innerHTML='<div class="card"><h3>Edit Harga</h3><p class="m">Ubah angka lalu klik Simpan. Berlaku langsung untuk order baru.</p>'+data.map(r=>`<label>${esc(SV[r.service_id])} — ${esc(r.label)} ${esc(r.unit)}</label><div style="display:flex;gap:8px"><input type="number" min="1" id="p_${r.service_id}_${r.key}" value="${r.price}"><button onclick="savePrice('${r.service_id}','${r.key}')">Simpan</button></div>`).join('')+'</div>';
+}
+async function savePrice(s,k){
+ const v=+$('#p_'+s+'_'+k).value;if(!(v>0))return msg('Harga tidak valid');
+ const{data,error}=await sb.from('prices').update({price:v}).eq('service_id',s).eq('key',k).select();
+ if(error)return msg(error.message);
+ if(!data.length)return msg('Gagal menyimpan (bukan admin?)');
+ P[s+'.'+k]=v;msg('Harga tersimpan.',true);
 }
 
 init();
