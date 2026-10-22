@@ -47,10 +47,10 @@ img.qr{width:100%;max-width:280px;display:block;margin:14px auto;border-radius:1
 <section id="auth" hidden>
  <div class="card">
   <h2 id="ttl">Masuk</h2>
-  <label>Username</label><input id="u" autocomplete="username">
-  <div id="wbox" hidden><label>Nomor WhatsApp</label><input id="w" type="tel" placeholder="08xxxxxxxxxx"></div>
+  <label>Nomor WhatsApp</label><input id="u" autocomplete="username" placeholder="08xxxxxxxxxx">
   <label>Password</label><input id="p" type="password" autocomplete="current-password">
   <button class="pri" id="go" onclick="auth()">Masuk</button>
+  <p class="m" style="font-size:13px;text-align:center">Lupa password? Hubungi admin lewat WhatsApp.</p>
   <p class="m" style="text-align:center"><a href="#" onclick="mode();return false" id="sw">Belum punya akun? Daftar</a></p>
  </div>
 </section>
@@ -70,19 +70,18 @@ const SV={coin:'Coin',diamond:'Diamond',event:'Event',livetier:'Live Tier',clans
 let P={},me=null,tab='order',svc='coin',reg=false,flt='';
 
 function msg(t,ok){const m=$('#msg');m.textContent=t||'';m.className=ok?'ok':'err';m.style.display=t?'block':'none'}
-function mode(){reg=!reg;$('#ttl').textContent=reg?'Daftar':'Masuk';$('#go').textContent=reg?'Daftar':'Masuk';$('#wbox').hidden=!reg;$('#sw').textContent=reg?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';msg('')}
+function mode(){reg=!reg;$('#ttl').textContent=reg?'Daftar':'Masuk';$('#go').textContent=reg?'Daftar':'Masuk';$('#sw').textContent=reg?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';msg('')}
 
 async function auth(){
- const u=$('#u').value.trim().toLowerCase(),p=$('#p').value;
- if(!/^[a-z0-9_]{3,20}$/.test(u))return msg('Username 3-20 karakter: huruf kecil, angka, atau _');
+ const raw=$('#u').value.trim().toLowerCase(),p=$('#p').value,isAdmin=raw=='admin';
+ const w=raw.replace(/\D/g,'').replace(/^0/,'62');
+ if(reg&&isAdmin)return msg('Nomor WhatsApp tidak valid');
+ if(!isAdmin&&!/^62\d{8,13}$/.test(w))return msg('Nomor WhatsApp tidak valid (contoh 08123456789)');
  if(p.length<6)return msg('Password minimal 6 karakter');
- const email=u=='admin'?'admin@hanzzz.app':'haniffadmuh154+'+u+'@gmail.com';let r;
- if(reg){
-  const w=$('#w').value.replace(/\D/g,'').replace(/^0/,'62');
-  if(!/^62\d{8,13}$/.test(w))return msg('Nomor WhatsApp tidak valid');
-  r=await sb.auth.signUp({email,password:p,options:{data:{username:u,whatsapp:w}}});
- }else r=await sb.auth.signInWithPassword({email,password:p});
- if(r.error){const e=r.error.message;return msg(/already|registered/i.test(e)?'Username sudah dipakai':/Invalid login/i.test(e)?'Username atau password salah':e)}
+ const email=isAdmin?'admin@hanzzz.app':'haniffadmuh154+'+w+'@gmail.com';let r;
+ if(reg)r=await sb.auth.signUp({email,password:p,options:{data:{username:w,whatsapp:w}}});
+ else r=await sb.auth.signInWithPassword({email,password:p});
+ if(r.error){const e=r.error.message;return msg(/already|registered/i.test(e)?'Nomor ini sudah terdaftar, silakan masuk':/Invalid login/i.test(e)?'Nomor atau password salah':e)}
  init();
 }
 async function out(){await sb.auth.signOut();location.reload()}
