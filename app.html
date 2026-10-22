@@ -4,34 +4,43 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Order | HanzzZ Joki DLS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--bg:#0f1115;--c:#1a1d24;--t:#eef1f5;--m:#9aa3b2;--a:#22c55e;--r:#ef4444;--y:#f59e0b}
-*{box-sizing:border-box}
-body{margin:0;font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--t)}
-header{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2f3a}
+:root{--bg:#01173d;--nav:#081120;--c:#111d33;--t:#fff;--m:#94a3b8;--a:#4dabff;--btn:#0d6efd;--ok:#22c55e;--r:#ef4444;--y:#f59e0b}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif}
+body{background:var(--bg);color:var(--t)}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 8%;background:var(--nav);position:sticky;top:0;z-index:99}
+header a{color:#fff;text-decoration:none;font-weight:600;font-size:20px;transition:.3s}
+header a:hover{color:var(--a)}
 a{color:var(--a);text-decoration:none}
-main{max-width:640px;margin:0 auto;padding:18px}
-.card{background:var(--c);border-radius:12px;padding:16px;margin-bottom:14px}
-label{display:block;margin:12px 0 4px;font-size:13px;color:var(--m)}
-input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #333a48;background:#0f1115;color:var(--t);font-size:15px}
-button{padding:10px 14px;border:0;border-radius:8px;background:#2a2f3a;color:var(--t);cursor:pointer;font-size:14px;margin:4px 4px 0 0}
-button.pri{background:var(--a);color:#06240f;font-weight:600;width:100%;margin-top:14px}
-#tabs{display:flex;flex-wrap:wrap;margin-bottom:12px}
-#tabs .on{background:var(--a);color:#06240f}
+main{max-width:640px;margin:0 auto;padding:30px 18px 60px}
+h2{margin-bottom:6px}
+p{line-height:1.6;margin-top:8px}
+.card{background:var(--c);border-radius:15px;padding:22px;margin-bottom:16px;border:1px solid rgba(255,255,255,.08);transition:.3s}
+.card:hover{border-color:#2563eb}
+label{display:block;margin:14px 0 5px;font-size:13px;color:var(--m)}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0b1426;color:#fff;font-size:15px}
+input:focus,select:focus{outline:none;border-color:var(--btn)}
+button{display:inline-block;padding:11px 20px;border:0;border-radius:10px;background:#1e293b;color:#fff;cursor:pointer;font-size:14px;margin:6px 6px 0 0;transition:.3s}
+button:hover{transform:translateY(-2px);background:#2b3a55}
+button.pri{background:var(--btn);width:100%;margin-top:18px;font-weight:600}
+button.pri:hover{background:#0b5ed7}
+#tabs{display:flex;flex-wrap:wrap;margin-bottom:18px}
+#tabs .on{background:var(--btn)}
 .m{color:var(--m)}
-.b{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:#2a2f3a}
-.s-DIPROSES,.s-MENUNGGU_VERIFIKASI{background:var(--y);color:#222}
-.s-SELESAI{background:var(--a);color:#062}
+.b{display:inline-block;padding:3px 11px;border-radius:99px;font-size:12px;background:#1e293b}
+.s-DIPROSES,.s-MENUNGGU_VERIFIKASI{background:var(--y);color:#1c1300}
+.s-SELESAI{background:var(--ok);color:#052e12}
 .s-DIBATALKAN,.s-PEMBAYARAN_DITOLAK{background:var(--r)}
-#msg{display:none;padding:10px;border-radius:8px;margin-bottom:12px}
+#msg{display:none;padding:12px;border-radius:10px;margin-bottom:16px}
 #msg.err{background:#4a1d1d}
 #msg.ok{background:#14391f}
-img.qr{width:100%;max-width:280px;display:block;margin:10px auto;border-radius:10px;background:#fff}
+img.qr{width:100%;max-width:280px;display:block;margin:14px auto;border-radius:12px;background:#fff}
 </style>
 </head>
 <body>
-<header><a href="index.html">← HanzzZ.</a><span id="who" class="m"></span></header>
+<header><a href="index.html">HanzzZ.</a><span id="who" class="m"></span></header>
 <main>
 <div id="msg"></div>
 
@@ -57,7 +66,7 @@ const sb=supabase.createClient('https://tankluguqjxntfvcsktk.supabase.co','sb_pu
 const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n).toLocaleString('id-ID');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ST={MENUNGGU_BAYAR:'Menunggu bayar',MENUNGGU_VERIFIKASI:'Menunggu verifikasi',DIPROSES:'Diproses',SELESAI:'Selesai',DIBATALKAN:'Dibatalkan',PEMBAYARAN_DITOLAK:'Pembayaran ditolak'};
-const SV={coin:'Coin',diamond:'Diamond',event:'Event',livetier:'Live Tier'};
+const SV={coin:'Coin',diamond:'Diamond',event:'Event',livetier:'Live Tier',clans:'Clans Point',dreampoint:'Dream Point',seasonpass:'Season Pass',dreamdraft:'Dream Draft'};
 let me=null,tab='order',svc='coin',reg=false,flt='';
 
 function msg(t,ok){const m=$('#msg');m.textContent=t||'';m.className=ok?'ok':'err';m.style.display=t?'block':'none'}
@@ -67,7 +76,7 @@ async function auth(){
  const u=$('#u').value.trim().toLowerCase(),p=$('#p').value;
  if(!/^[a-z0-9_]{3,20}$/.test(u))return msg('Username 3-20 karakter: huruf kecil, angka, atau _');
  if(p.length<6)return msg('Password minimal 6 karakter');
- const email=u+'@hanzzz.app';let r;
+ const email=u=='admin'?'admin@hanzzz.app':'haniffadmuh154+'+u+'@gmail.com';let r;
  if(reg){
   const w=$('#w').value.replace(/\D/g,'').replace(/^0/,'62');
   if(!/^62\d{8,13}$/.test(w))return msg('Nomor WhatsApp tidak valid');
@@ -97,12 +106,20 @@ const F={
 coin:'<label>Bonus Stadion (1-52)</label><input id="f1" type="number" min="1" max="52" value="1"><label>Jumlah koin (dalam K, 1 = 1.000 koin)</label><input id="f2" type="number" min="1" value="10">',
 diamond:'<label>Jumlah diamond</label><input id="f1" type="number" min="1" value="100">',
 event:'<label>Rentang tier</label><select id="f1"><option value="20-16">Tier 20 → 16</option><option value="15-11">Tier 15 → 11</option><option value="10-6">Tier 10 → 6</option><option value="5-1">Tier 5 → 1</option><option value="special">Event pemain spesial (semua tier)</option></select>',
-livetier:'<label>Tier sekarang (1-20)</label><input id="f1" type="number" min="1" max="20" value="20"><label>Tier tujuan (1-20)</label><input id="f2" type="number" min="1" max="20" value="15">'};
+livetier:'<label>Tier sekarang (1-20)</label><input id="f1" type="number" min="1" max="20" value="20"><label>Tier tujuan (1-20)</label><input id="f2" type="number" min="1" max="20" value="15">',
+clans:'<label>Paket</label><select id="f1"><option value="30k">30.000 CP — Rp2.000</option><option value="350k">350.000 CP — Rp20.000</option></select><label>Jumlah paket</label><input id="f2" type="number" min="1" max="50" value="1">',
+dreampoint:'<label>Jumlah (tiap 1 = 10K DP, Rp20.000)</label><input id="f1" type="number" min="1" max="100" value="1">',
+seasonpass:'<label>Jumlah XP (kelipatan 500, Rp1.000 / 500 XP)</label><input id="f1" type="number" min="500" step="500" value="500">',
+dreamdraft:'<p class="m">Dream Draft — Rp12.000, tanpa pilihan tambahan.</p>'};
 
 function det(){
  if(svc=='coin')return{stadium:+$('#f1').value,amount_k:+$('#f2').value};
  if(svc=='diamond')return{amount:+$('#f1').value};
  if(svc=='event')return{range:$('#f1').value};
+ if(svc=='clans')return{package:$('#f1').value,qty:+$('#f2').value};
+ if(svc=='dreampoint')return{amount_10k:+$('#f1').value};
+ if(svc=='seasonpass')return{xp:+$('#f1').value};
+ if(svc=='dreamdraft')return{};
  return{from_tier:+$('#f1').value,to_tier:+$('#f2').value};
 }
 function calc(s,d){ // hanya estimasi; harga resmi dihitung server
@@ -110,6 +127,10 @@ function calc(s,d){ // hanya estimasi; harga resmi dihitung server
  if(s=='coin')t=d.amount_k*(d.stadium<=25?4000:d.stadium<=39?3000:2000);
  else if(s=='diamond')t=d.amount*(d.amount>=1000?50:60);
  else if(s=='event')t={'20-16':8000,'15-11':12000,'10-6':15000,'5-1':18000,special:25000}[d.range];
+ else if(s=='clans')t=({'30k':2000,'350k':20000}[d.package]||0)*d.qty;
+ else if(s=='dreampoint')t=d.amount_10k*20000;
+ else if(s=='seasonpass')t=Math.floor(d.xp/500)*1000;
+ else if(s=='dreamdraft')t=12000;
  else{const f=d.from_tier,o=d.to_tier;if(o<f)for(let i=o;i<f;i++)t+=i<=3?8000:i<=8?6000:i<=13?4000:2000;else t=(o-f)*2000}
  return t||0;
 }
@@ -118,7 +139,7 @@ function form(){
  $('#v').innerHTML=`<div class="card"><label>Layanan</label><select id="sv" onchange="svc=this.value;form()">${Object.entries(SV).map(([k,n])=>`<option value="${k}" ${svc==k?'selected':''}>${n}</option>`).join('')}</select>${F[svc]}
  <label>ID akun DLS (JANGAN tulis password di sini)</label><input id="gid">
  <p>Estimasi: <b id="est">Rp0</b><br><small class="m">Ditambah kode unik 1-999 saat order dibuat. Total resmi dihitung sistem.</small></p>
- <button class="pri" onclick="order()">Buat Order</button></div>`;
+ <button class="pri" onclick="order()">Buat Order</button><p class="m" style="font-size:13px;margin-top:14px">Upgrade Stadion, Fasilitas, Rating, Pemain, dan Edit Logo: <a target="_blank" href="https://wa.me/6287777265953">konsultasi via WhatsApp</a>.</p></div>`;
  $('#v').querySelectorAll('input,select').forEach(e=>e.oninput=est);est();
 }
 async function order(){
