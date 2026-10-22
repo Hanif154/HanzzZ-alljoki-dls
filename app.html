@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order | HanzzZ Joki DLS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--bg:#0f1115;--c:#1a1d24;--t:#eef1f5;--m:#9aa3b2;--a:#22c55e;--r:#ef4444;--y:#f59e0b}
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{display:flex;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2a2f3a}
+a{color:var(--a);text-decoration:none}
+main{max-width:640px;margin:0 auto;padding:18px}
+.card{background:var(--c);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;margin:12px 0 4px;font-size:13px;color:var(--m)}
+input,select{width:100%;padding:11px;border-radius:8px;border:1px solid #333a48;background:#0f1115;color:var(--t);font-size:15px}
+button{padding:10px 14px;border:0;border-radius:8px;background:#2a2f3a;color:var(--t);cursor:pointer;font-size:14px;margin:4px 4px 0 0}
+button.pri{background:var(--a);color:#06240f;font-weight:600;width:100%;margin-top:14px}
+#tabs{display:flex;flex-wrap:wrap;margin-bottom:12px}
+#tabs .on{background:var(--a);color:#06240f}
+.m{color:var(--m)}
+.b{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;background:#2a2f3a}
+.s-DIPROSES,.s-MENUNGGU_VERIFIKASI{background:var(--y);color:#222}
+.s-SELESAI{background:var(--a);color:#062}
+.s-DIBATALKAN,.s-PEMBAYARAN_DITOLAK{background:var(--r)}
+#msg{display:none;padding:10px;border-radius:8px;margin-bottom:12px}
+#msg.err{background:#4a1d1d}
+#msg.ok{background:#14391f}
+img.qr{width:100%;max-width:280px;display:block;margin:10px auto;border-radius:10px;background:#fff}
+</style>
+</head>
+<body>
+<header><a href="index.html">← HanzzZ.</a><span id="who" class="m"></span></header>
+<main>
+<div id="msg"></div>
+
+<section id="auth" hidden>
+ <div class="card">
+  <h2 id="ttl">Masuk</h2>
+  <label>Username</label><input id="u" autocomplete="username">
+  <div id="wbox" hidden><label>Nomor WhatsApp</label><input id="w" type="tel" placeholder="08xxxxxxxxxx"></div>
+  <label>Password</label><input id="p" type="password" autocomplete="current-password">
+  <button class="pri" id="go" onclick="auth()">Masuk</button>
+  <p class="m" style="text-align:center"><a href="#" onclick="mode();return false" id="sw">Belum punya akun? Daftar</a></p>
+ </div>
+</section>
+
+<section id="app" hidden>
+ <div id="tabs"></div>
+ <div id="v"></div>
+</section>
+</main>
+
+<script>
+const sb=supabase.createClient('https://tankluguqjxntfvcsktk.supabase.co','sb_publishable_h2aQ-_qGmciidA4ZUupTdw_mXWziHwn');
+const $=s=>document.querySelector(s),rp=n=>'Rp'+Number(n).toLocaleString('id-ID');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ST={MENUNGGU_BAYAR:'Menunggu bayar',MENUNGGU_VERIFIKASI:'Menunggu verifikasi',DIPROSES:'Diproses',SELESAI:'Selesai',DIBATALKAN:'Dibatalkan',PEMBAYARAN_DITOLAK:'Pembayaran ditolak'};
+const SV={coin:'Coin',diamond:'Diamond',event:'Event',livetier:'Live Tier'};
+let me=null,tab='order',svc='coin',reg=false,flt='';
+
+function msg(t,ok){const m=$('#msg');m.textContent=t||'';m.className=ok?'ok':'err';m.style.display=t?'block':'none'}
+function mode(){reg=!reg;$('#ttl').textContent=reg?'Daftar':'Masuk';$('#go').textContent=reg?'Daftar':'Masuk';$('#wbox').hidden=!reg;$('#sw').textContent=reg?'Sudah punya akun? Masuk':'Belum punya akun? Daftar';msg('')}
+
+async function auth(){
+ const u=$('#u').value.trim().toLowerCase(),p=$('#p').value;
+ if(!/^[a-z0-9_]{3,20}$/.test(u))return msg('Username 3-20 karakter: huruf kecil, angka, atau _');
+ if(p.length<6)return msg('Password minimal 6 karakter');
+ const email=u+'@hanzzz.app';let r;
+ if(reg){
+  const w=$('#w').value.replace(/\D/g,'').replace(/^0/,'62');
+  if(!/^62\d{8,13}$/.test(w))return msg('Nomor WhatsApp tidak valid');
+  r=await sb.auth.signUp({email,password:p,options:{data:{username:u,whatsapp:w}}});
+ }else r=await sb.auth.signInWithPassword({email,password:p});
+ if(r.error){const e=r.error.message;return msg(/already|registered/i.test(e)?'Username sudah dipakai':/Invalid login/i.test(e)?'Username atau password salah':e)}
+ init();
+}
+async function out(){await sb.auth.signOut();location.reload()}
+
+async function init(){
+ const{data:{session}}=await sb.auth.getSession();
+ if(!session){$('#auth').hidden=false;$('#app').hidden=true;return}
+ const{data}=await sb.from('profiles').select('*').eq('id',session.user.id).single();
+ me=data;$('#auth').hidden=true;$('#app').hidden=false;msg('');render();
+}
+
+function render(){
+ const t=[['order','Pesan'],['mine','Order Saya']];if(me.is_admin)t.push(['admin','Admin']);
+ $('#tabs').innerHTML=t.map(([k,n])=>`<button class="${tab==k?'on':''}" onclick="tab='${k}';render()">${n}</button>`).join('')+'<button onclick="out()">Keluar</button>';
+ $('#who').textContent=me.username;msg('');
+ ({order:form,mine:mine,admin:admin})[tab]();
+}
+
+/* ---------- FORM ORDER ---------- */
+const F={
+coin:'<label>Bonus Stadion (1-52)</label><input id="f1" type="number" min="1" max="52" value="1"><label>Jumlah koin (dalam K, 1 = 1.000 koin)</label><input id="f2" type="number" min="1" value="10">',
+diamond:'<label>Jumlah diamond</label><input id="f1" type="number" min="1" value="100">',
+event:'<label>Rentang tier</label><select id="f1"><option value="20-16">Tier 20 → 16</option><option value="15-11">Tier 15 → 11</option><option value="10-6">Tier 10 → 6</option><option value="5-1">Tier 5 → 1</option><option value="special">Event pemain spesial (semua tier)</option></select>',
+livetier:'<label>Tier sekarang (1-20)</label><input id="f1" type="number" min="1" max="20" value="20"><label>Tier tujuan (1-20)</label><input id="f2" type="number" min="1" max="20" value="15">'};
+
+function det(){
+ if(svc=='coin')return{stadium:+$('#f1').value,amount_k:+$('#f2').value};
+ if(svc=='diamond')return{amount:+$('#f1').value};
+ if(svc=='event')return{range:$('#f1').value};
+ return{from_tier:+$('#f1').value,to_tier:+$('#f2').value};
+}
+function calc(s,d){ // hanya estimasi; harga resmi dihitung server
+ let t=0;
+ if(s=='coin')t=d.amount_k*(d.stadium<=25?4000:d.stadium<=39?3000:2000);
+ else if(s=='diamond')t=d.amount*(d.amount>=1000?50:60);
+ else if(s=='event')t={'20-16':8000,'15-11':12000,'10-6':15000,'5-1':18000,special:25000}[d.range];
+ else{const f=d.from_tier,o=d.to_tier;if(o<f)for(let i=o;i<f;i++)t+=i<=3?8000:i<=8?6000:i<=13?4000:2000;else t=(o-f)*2000}
+ return t||0;
+}
+function est(){try{$('#est').textContent=rp(calc(svc,det()))}catch(e){}}
+function form(){
+ $('#v').innerHTML=`<div class="card"><label>Layanan</label><select id="sv" onchange="svc=this.value;form()">${Object.entries(SV).map(([k,n])=>`<option value="${k}" ${svc==k?'selected':''}>${n}</option>`).join('')}</select>${F[svc]}
+ <label>ID akun DLS (JANGAN tulis password di sini)</label><input id="gid">
+ <p>Estimasi: <b id="est">Rp0</b><br><small class="m">Ditambah kode unik 1-999 saat order dibuat. Total resmi dihitung sistem.</small></p>
+ <button class="pri" onclick="order()">Buat Order</button></div>`;
+ $('#v').querySelectorAll('input,select').forEach(e=>e.oninput=est);est();
+}
+async function order(){
+ const{error}=await sb.rpc('create_order',{p_service:svc,p_details:det(),p_game_id:$('#gid').value});
+ if(error)return msg(error.message);
+ tab='mine';render();msg('Order dibuat! Silakan bayar lewat QRIS di bawah.',true);
+}
+
+/* ---------- ORDER SAYA ---------- */
+function detTxt(o){return Object.entries(o.details).map(([k,v])=>`${esc(k)}: ${esc(v)}`).join(', ')}
+async function mine(){
+ const{data,error}=await sb.from('orders').select('*').order('created_at',{ascending:false});
+ if(error)return msg(error.message);
+ $('#v').innerHTML=data.length?data.map(o=>{
+  const can=(o.status=='MENUNGGU_BAYAR'||o.status=='PEMBAYARAN_DITOLAK')&&new Date(o.expires_at)>new Date();
+  return`<div class="card"><b>${esc(o.code)}</b> <span class="b s-${o.status}">${ST[o.status]}</span>
+  <p>${SV[o.service_id]} — ${detTxt(o)}<br><span class="m">Akun: ${esc(o.game_account_id)}</span><br>Total: <b>${rp(o.total)}</b></p>
+  ${o.status=='PEMBAYARAN_DITOLAK'&&o.admin_note?`<p class="m">Catatan admin: ${esc(o.admin_note)}</p>`:''}
+  ${can?`<img class="qr" src="qris.jpeg" alt="QRIS">
+  <p>Transfer <b>TEPAT ${rp(o.total)}</b> (termasuk kode unik ${o.unique_code}) lewat QRIS, lalu isi ID transaksi DANA.<br><small class="m">Bayar sebelum ${new Date(o.expires_at).toLocaleString('id-ID')}</small></p>
+  <label>ID transaksi DANA</label><input id="r${o.id}">
+  <button class="pri" onclick="pay('${o.id}')">Kirim ID Pembayaran</button>
+  <button onclick="cnl('${o.id}')">Batalkan order</button>`:''}
+  ${o.status=='MENUNGGU_VERIFIKASI'?'<p class="m">Pembayaranmu sedang dicek admin.</p>':''}
+  ${o.status=='DIPROSES'?'<p class="m">Pembayaran terverifikasi. Admin akan menghubungi lewat WhatsApp.</p>':''}
+  </div>`}).join(''):'<p class="m">Belum ada order.</p>';
+}
+async function pay(id){const{error}=await sb.rpc('submit_payment',{p_order_id:id,p_ref:$('#r'+id).value});if(error)return alert(error.message);mine();msg('ID pembayaran terkirim. Tunggu verifikasi admin.',true)}
+async function cnl(id){if(!confirm('Batalkan order ini?'))return;const{error}=await sb.rpc('cancel_my_order',{p_order_id:id});if(error)alert(error.message);mine()}
+
+/* ---------- ADMIN ---------- */
+async function admin(){
+ let q=sb.from('orders').select('*,profiles(username,whatsapp)').order('created_at',{ascending:false}).limit(100);
+ if(flt)q=q.eq('status',flt);
+ const{data,error}=await q;if(error)return msg(error.message);
+ $('#v').innerHTML=`<select onchange="flt=this.value;admin()"><option value="">Semua status</option>${Object.entries(ST).map(([k,n])=>`<option value="${k}" ${flt==k?'selected':''}>${n}</option>`).join('')}</select><br><br>`+
+ data.map(o=>{const w=o.profiles?.whatsapp,s=o.status;return`<div class="card"><b>${esc(o.code)}</b> <span class="b s-${s}">${ST[s]}</span>
+ <p>${esc(o.profiles?.username)} · ${w?`<a target="_blank" href="https://wa.me/${esc(w)}">${esc(w)}</a>`:'-'}<br>${SV[o.service_id]} — ${detTxt(o)}<br>Akun DLS: <b>${esc(o.game_account_id)}</b><br>Total: <b>${rp(o.total)}</b> <span class="m">(kode unik ${o.unique_code})</span><br>ID DANA: <b>${esc(o.payment_ref||'-')}</b></p>
+ ${s=='MENUNGGU_VERIFIKASI'?`<button class="pri" style="width:auto" onclick="act('${o.id}','verify')">Verifikasi</button><button onclick="act('${o.id}','reject')">Tolak</button>`:''}
+ ${s=='DIPROSES'?`<button class="pri" style="width:auto" onclick="act('${o.id}','complete')">Selesai</button>`:''}
+ ${['MENUNGGU_BAYAR','MENUNGGU_VERIFIKASI','DIPROSES','PEMBAYARAN_DITOLAK'].includes(s)?`<button onclick="act('${o.id}','cancel')">Batalkan</button>`:''}</div>`}).join('')||'<p class="m">Tidak ada order.</p>';
+}
+async function act(id,a){
+ let n=null;if(a=='reject'||a=='cancel'){n=prompt('Catatan / alasan (opsional)');if(n===null)return}
+ else if(a=='verify'&&!confirm('Pastikan ID dan nominal sudah cocok di mutasi DANA. Verifikasi?'))return;
+ const{error}=await sb.rpc('admin_update_order',{p_order_id:id,p_action:a,p_note:n});
+ if(error)alert(error.message);admin();
+}
+
+init();
+</script>
+</body>
+</html>
